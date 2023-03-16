@@ -32,7 +32,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="IVSDKDotNetWrapper">
-      <HintPath>..\..\..\..\..\..\Downloads\IV-SDK.NET.v0.6\IVSDKDotNetWrapper.dll</HintPath>
+      <HintPath>..\..\..\IVSDKDotNet\Debug\IVSDKDotNetWrapper.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
