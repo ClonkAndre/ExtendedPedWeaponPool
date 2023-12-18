@@ -4,11 +4,12 @@ using System.Numerics;
 
 using IVSDKDotNet;
 using IVSDKDotNet.Enums;
-
 using static IVSDKDotNet.Native.Natives;
 
-namespace ExtendedPedWeaponPool {
-    public class Main : Script {
+namespace ExtendedPedWeaponPool
+{
+    public class Main : Script
+    {
 
         #region Variables
         private readonly string[] splitChar = new string[] { "," };
@@ -33,7 +34,7 @@ namespace ExtendedPedWeaponPool {
         #endregion
 
         #region Classes
-        public class WeaponOverride
+        private class WeaponOverride
         {
             #region Variables
             public int Chance;
@@ -100,13 +101,9 @@ namespace ExtendedPedWeaponPool {
                     if (!string.IsNullOrWhiteSpace(pedModels))
                     {
                         if (!pedModels.Contains(","))
-                        {
                             pedModelsList.Add(pedModels);
-                        }
                         else
-                        {
                             pedModelsList.AddRange(pedModels.Split(splitChar, StringSplitOptions.RemoveEmptyEntries));
-                        }
                     }
 
                     weaponOverrides.Add(new WeaponOverride(chance, (uint)episode, area, pedType, pedModelsList, newWeapon, ammoMin, ammoMax));
@@ -129,22 +126,26 @@ namespace ExtendedPedWeaponPool {
 
             if (canStartTimer)
             {
-                StartNewTimer(executeIn, () => {
+                StartNewTimer(executeIn, () =>
+                {
 
                     if (weaponOverrides == null || weaponOverrides.Count == 0)
                         return;
 
-                    //GET_GAME_TIMER(out uint timer);
-                    //rnd = new Random((int)timer);
                     rnd = new Random();
 
                     // Get current episode
                     uint currentEpisode = GET_CURRENT_EPISODE();
 
-                    int[] peds = CPools.GetAllPedHandles();
-                    for (int p = 0; p < peds.Length; p++)
+                    IVPool pedPool = IVPools.GetPedPool();
+                    for (int p = 0; p < pedPool.Count; p++)
                     {
-                        int ped = peds[p];
+                        UIntPtr pedPtr = pedPool.Get(p);
+
+                        if (pedPtr == UIntPtr.Zero)
+                            continue;
+
+                        int ped = (int)pedPool.GetIndex(pedPtr);
 
                         if (ped == pPed)
                             continue;
@@ -210,87 +211,6 @@ namespace ExtendedPedWeaponPool {
                 });
                 canStartTimer = false;
             }
-
-            //if (weaponOverrides == null || weaponOverrides.Count == 0)
-            //    return;
-
-            //GET_GAME_TIMER(out uint timer);
-            //rnd = new Random((int)timer);
-
-            //// Get player ped
-            //int playerID = CONVERT_INT_TO_PLAYERINDEX(GET_PLAYER_ID());
-            //GET_PLAYER_CHAR(playerID, out int pPed);
-
-            //// Shows the current area name that the player is in if activated
-            //if (showAreaName)
-            //{
-            //    GET_CHAR_COORDINATES(pPed, out Vector3 pos);
-            //    ShowSubtitleMessage("Area: " + GET_NAME_OF_ZONE(pos.X, pos.Y, pos.Z));
-            //}
-
-            //// Get current episode
-            //uint currentEpisode = GET_CURRENT_EPISODE();
-
-            //int[] peds = CPools.GetAllPedHandles();
-            //for (int p = 0; p < peds.Length; p++)
-            //{
-            //    int ped = peds[p];
-                
-            //    if (ped == pPed)
-            //        continue;
-            //    if (IS_CHAR_DEAD(ped))
-            //        continue;
-
-            //    // Get ped type
-            //    GET_PED_TYPE(ped, out uint pType);
-            //    ePedType pedType = (ePedType)pType;
-
-            //    // Get ped model
-            //    GET_CHAR_MODEL(ped, out int pModel);
-
-            //    // Get ped coordinates
-            //    GET_CHAR_COORDINATES(ped, out Vector3 pos);
-
-            //    // Get current ped area
-            //    string currentPedArea = GET_NAME_OF_ZONE(pos.X, pos.Y, pos.Z);
-
-            //    // Loop through all available weapon overrides
-            //    for (int w = 0; w < weaponOverrides.Count; w++)
-            //    {
-            //        WeaponOverride wO = weaponOverrides[w];
-
-            //        // Check if things are ok and matching
-            //        if (wO.PedType <= -1 && wO.PedModels.Count == 0)
-            //            continue;
-
-            //        if (wO.Episode != currentEpisode && wO.Episode != 3)
-            //            continue;
-            //        if (wO.Area != currentPedArea && wO.Area.ToLower() != "any")
-            //            continue;
-
-            //        // If ped type is not smaller or equals to -1, then check for ped type.
-            //        if (!(wO.PedType <= -1))
-            //        {
-            //            if ((ePedType)wO.PedType != pedType)
-            //                continue;
-            //        }
-
-            //        // Check if current ped model is in list of ped models.
-            //        if (!wO.PedModels.Contains(string.Format("0x{0}", pModel.ToString("X"))))
-            //            continue;
-
-            //        // Check chance
-            //        if (!(rnd.Next(0, 501) <= wO.Chance))
-            //            continue;
-
-            //        // Give new weapon to char
-            //        if (!HAS_CHAR_GOT_WEAPON(ped, (uint)wO.NewWeapon))
-            //        {
-            //            REMOVE_ALL_CHAR_WEAPONS(ped);
-            //            GIVE_WEAPON_TO_CHAR(ped, (uint)wO.NewWeapon, (uint)rnd.Next(wO.AmmoMin, wO.AmmoMax), false);
-            //        }
-            //    }
-            //}
         }
 
     }
